@@ -31,3 +31,46 @@ def route_create(route: RouteCreate, session: Session = Depends(get_session)):
 
     session.commit()
     return db_route
+
+@router.get("/routes")
+def list_routes(session: Session = Depends(get_session)):
+
+    routes = session.exec(select(Route)).all()
+
+    result = []
+
+    for route in routes:
+        stops = session.exec(select(RouteStop).where(RouteStop.route_id == route.id)).all()
+
+        stops_with_items = []
+        for stop in stops:
+            items = session.exec(select(RouteItem).where(RouteItem.stop_id == stop.id)).all()
+            stops_with_items.append ({
+                "city": stop.city,
+                "items": items
+            })
+
+        result.append({
+            "id": route.id,
+            "name": route.name,
+            "status": route.status,
+            "stops": stops_with_items
+        })
+
+    return result
+
+@router.patch("/routes/{id}")
+def update_route(id: int, status: str, session: Session = Depends(get_session)):
+
+    route = session.get(Route, id)
+    route.status = status
+
+    session.add(route)
+    session.commit()
+    session.refresh(route)
+    
+
+    return route
+
+
+
