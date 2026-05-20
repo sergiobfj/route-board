@@ -3,6 +3,9 @@ from sqlmodel import Session, select
 from models import Route, RouteStop, RouteItem, RouteCreate
 from database import get_session
 
+import openpyxl
+from io import BytesIO
+
 router = APIRouter()
 
 @router.post("/routes")
@@ -110,7 +113,7 @@ def get_display(session: Session = Depends(get_session)):
                 "city": stop.city,
                 "items": items
             })
-            
+
         waiting_data = {
             "id": waiting.id,
             "name": waiting.name,
@@ -129,3 +132,45 @@ def get_display(session: Session = Depends(get_session)):
     }
 
             
+@router.post("/import")
+async def import_route(file: UploadFile, session: Session = Depends(get_session)):
+    contents = await file.read()
+    workbook = openpyxl.load_workbook(BytesIO(contents))
+    sheet = workbook.active
+
+    header_row = list(sheet.iter_rows(min_row=4, max_row=4, values_only=True))[0]
+    route_name = header_row[1]
+    driver_name = header_row[3]
+    truck_plate = header_row[5]
+
+    db_route = Route(name=route_name, driver_name=driver_name, truck_plate=truck_plate)
+    session.add(db_route)
+    session.commit()
+    session.refresh(db_route)
+
+    stops_dict = {}
+
+    for row in sheet.iter_rows(min_row=6, values_only=True):
+        if row[1] == "TOTAL" or row[1] is None:
+            break
+
+        code, client_name, qty, modules, inverter, kit_tech, city, notes, roof = row[:9]
+
+        if city not in stops_dict:
+            db_stop = RouteStop(city=city, route_id=db_route.id)
+            session.add(db_stop)
+            session.commit()
+            session.refresh(db_stop)
+            stops_dict[city] = db_stop.id
+
+        db_item = RouteItem(
+            module_qty=qty,
+            module_brand=modules,
+            inverter_qty=1,
+            inverter_brand=inverter,
+            stop_id=stops_dict[city]
+        )
+        session.add(db_item)
+
+    session.commit()
+    return {"message": "Importado com sucesso", "route_id": db_route.id}
