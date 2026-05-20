@@ -69,8 +69,63 @@ def update_route(id: int, status: str, session: Session = Depends(get_session)):
     session.commit()
     session.refresh(route)
     
-
     return route
 
+@router.get("/display")
+def get_display(session: Session = Depends(get_session)):
+
+    statement = select(Route).where(Route.status == "in_progress").order_by(Route.created_at)
+    in_progress = session.exec(statement).first()
+
+    if in_progress:
+        stops = session.exec(select(RouteStop).where(RouteStop.route_id == in_progress.id)).all()
+        
+        stops_with_items = []
+        for stop in stops:
+            items = session.exec(select(RouteItem).where(RouteItem.stop_id == stop.id)).all()
+            stops_with_items.append({
+                "city": stop.city,
+                "items": items
+            })
+        
+        in_progress_data = {
+            "id": in_progress.id,
+            "name": in_progress.name,
+            "stops": stops_with_items
+        }
+    else:
+        in_progress_data = None
 
 
+    statement = select(Route).where(Route.status == "waiting").order_by(Route.created_at)
+    waiting = session.exec(statement).first()
+
+    if waiting:
+        stops = session.exec(select(RouteStop).where(RouteStop.route_id == waiting.id)).all()
+
+        stops_with_items = []
+        for stop in stops:
+            items = session.exec(select(RouteItem).where(RouteItem.stop_id == stop.id)).all()
+            stops_with_items.append ({
+                "city": stop.city,
+                "items": items
+            })
+            
+        waiting_data = {
+            "id": waiting.id,
+            "name": waiting.name,
+            "driver_name": waiting.driver_name,
+            "truck_plate": waiting.truck_plate,
+            "stops": stops_with_items
+        }
+
+    else:
+        waiting_data = None
+
+    
+    return {
+        "in_progress": in_progress_data,
+        "next": waiting_data
+    }
+
+            
