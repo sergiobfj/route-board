@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Almoxarifado 1 - Carregamento Virtron</title>
+    <style>
+        :root {
+            --virtron-green: #016e34;
+            --virtron-green-light: #e8f5e9;
+            --bg-light: #f4f7f6;
+            --bg-white: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--bg-white);
+            padding: 10px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+            border-bottom: 4px solid var(--virtron-green);
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+
+        .clock {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            background: #eee;
+            padding: 5px 20px;
+            border-radius: 8px;
+        }
+
+        /* MAIN SECTION (75%) */
+        .main-section {
+            flex: 3;
+            padding: 20px 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-title-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-badge {
+            background-color: var(--virtron-green);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .route-name {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            text-transform: uppercase;
+        }
+
+        /* Stops Grid */
+        .stops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 25px;
+        }
+
+        .stop-card {
+            background-color: var(--virtron-green-light);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #c8e6c9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .city-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--virtron-green);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #c8e6c9;
+            padding-bottom: 5px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table th {
+            text-align: left;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            padding: 5px 10px;
+        }
+
+        .items-table td {
+            padding: 10px;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .col-qty { width: 80px; text-align: center; font-weight: 900; font-size: 1.6rem; color: var(--virtron-green); }
+        .col-brand { font-weight: 700; font-size: 1.2rem; color: #333; }
+
+        .table-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* NEXT SECTION (25%) */
+        .next-section {
+            flex: 0.8;
+            background-color: #f0f0f0;
+            border-top: 4px solid #ccc;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .next-label {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .next-route-info {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .next-details {
+            display: flex;
+            gap: 40px;
+        }
+
+        .detail-item {
+            text-align: right;
+        }
+
+        .detail-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #444;
+        }
+
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .empty-state h1 { font-size: 3rem; margin-bottom: 10px; }
+
+        /* Scrollbar hide */
+        .main-section::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <img src="https://grupovirtron.com/wp-content/uploads/2025/11/logo1012.png" alt="Virtron" class="logo-img">
+        <div class="clock" id="clock">00:00:00</div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main-section" id="main-content">
+        <!-- Conteúdo via JS -->
+    </main>
+
+    <!-- PRÓXIMA ROTA -->
+    <section class="next-section" id="next-section" style="display: none;">
+        <div>
+            <div class="next-label">Próxima Rota</div>
+            <div class="next-route-info" id="next-name">—</div>
+        </div>
+        <div class="next-details">
+            <div class="detail-item">
+                <div class="detail-label">Motorista</div>
+                <div class="detail-value" id="next-driver">—</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Placa</div>
+                <div class="detail-value" id="next-plate">—</div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/display';
+
+        function f(val) {
+            return (val === null || val === undefined || val === '') ? '—' : val;
+        }
+
+        async function updateDisplay() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                
+                renderMain(data.in_progress);
+                renderNext(data.next);
+            } catch (e) {
+                console.warn("API Offline");
+            }
+        }
+
+        function groupItems(items) {
+            const modules = {};
+            const inverters = {};
+
+            items.forEach(item => {
+                // Agrupar Módulos
+                if (item.module_brand) {
+                    modules[item.module_brand] = (modules[item.module_brand] || 0) + (item.module_qty || 0);
+                }
+                // Agrupar Inversores
+                if (item.inverter_brand) {
+                    inverters[item.inverter_brand] = (inverters[item.inverter_brand] || 0) + (item.inverter_qty || 0);
+                }
+            });
+
+            return {
+                modules: Object.entries(modules).map(([brand, qty]) => ({ brand, qty })),
+                inverters: Object.entries(inverters).map(([brand, qty]) => ({ brand, qty }))
+            };
+        }
+
+        function renderMain(route) {
+            const container = document.getElementById('main-content');
+            
+            if (!route || !route.name) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h1>Aguardando próxima rota...</h1>
+                        <p>O almoxarifado está pronto para o carregamento.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="main-title-container">
+                    <span class="status-badge">Em Carregamento</span>
+                    <h1 class="route-name">${route.name}</h1>
+                </div>
+                <div class="stops-grid">
+            `;
+
+            if (route.stops && route.stops.length > 0) {
+                route.stops.forEach(stop => {
+                    const grouped = groupItems(stop.items || []);
+                    
+                    html += `
+                        <div class="stop-card">
+                            <div class="city-name">${stop.city}</div>
+                            <div class="table-split">
+                                <!-- Módulos Agrupados -->
+                                <div>
+                                    <table class="items-table">
+                                        <thead><tr><th colspan="2">Módulos</th></tr></thead>
+                                        <tbody>
+                                            ${grouped.modules.length > 0 ? grouped.modules.map(m => `
+                                                <tr>
+                                                    <td class="col-qty">${m.qty}</td>
+                                                    <td class="col-brand">${m.brand}</td>
+                                                </tr>
+                                            `).join('') : '<tr><td colspan="2" style="color:#ccc;text-align:center">Nenhum módulo</td></tr>'}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Inversores Agrupados -->
+                                <div>
+                                    <table class="items-table">
+                                        <thead><tr><th colspan="2">Inversores</th></tr></thead>
+                                        <tbody>
+                                            ${grouped.inverters.length > 0 ? grouped.inverters.map(i => `
+                                                <tr>
+                                                    <td class="col-qty">${i.qty}</td>
+                                                    <td class="col-brand">${i.brand}</td>
+                                                </tr>
+                                            `).join('') : '<tr><td colspan="2" style="color:#ccc;text-align:center">Nenhum inversor</td></tr>'}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderNext(next) {
+            const section = document.getElementById('next-section');
+            if (!next || !next.name) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'flex';
+            document.getElementById('next-name').textContent = f(next.name);
+            document.getElementById('next-driver').textContent = f(next.driver_name);
+            document.getElementById('next-plate').textContent = f(next.truck_plate);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('pt-BR');
+        }
+
+        setInterval(updateDisplay, 5000);
+        setInterval(updateClock, 1000);
+        updateDisplay();
+        updateClock();
+    </script>
+</body>
+</html>

@@ -4,6 +4,8 @@ from datetime import datetime
 class Route(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
+    driver_name: str | None = None 
+    truck_plate: str
     status: str = Field(default="waiting")
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -33,3 +35,5 @@ class RouteStopCreate(SQLModel):
 class RouteCreate(SQLModel):
     name: str
     stops: list[RouteStopCreate]
+    driver_name: str
+    truck_plate: str
