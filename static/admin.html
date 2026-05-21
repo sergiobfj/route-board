@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Virtron Energia Solar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(90deg, #0b6f35 0%, #0d7a3a 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(11, 111, 53, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #0b6f35;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* CONTAINER */
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* STATUS BADGE */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in_progress {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-completed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        /* ROUTES LIST */
+        .routes-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .route-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(11, 111, 53, 0.1);
+            border-left: 6px solid #0b6f35;
+            transition: all 0.3s ease;
+        }
+
+        .route-card:hover {
+            box-shadow: 0 8px 20px rgba(11, 111, 53, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .route-card.completed {
+            opacity: 0.6;
+            background: #f5f5f5;
+            border-left-color: #ccc;
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .route-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0b6f35;
+            word-break: break-word;
+        }
+
+        .route-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 70px;
+        }
+
+        .info-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        /* STOPS */
+        .stops-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .stops-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .stop-item {
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 3px solid #0b6f35;
+        }
+
+        .stop-city {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0b6f35;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .items-mini-table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+
+        .items-mini-table th {
+            background: #0b6f35;
+            color: white;
+            padding: 4px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .items-mini-table td {
+            padding: 3px 4px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #333;
+            font-size: 11px;
+        }
+
+        .items-mini-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .qty-mini {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #0b6f35;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        /* ACTIONS */
+        .route-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .route-actions .btn {
+            flex: 1;
+        }
+
+        /* LOADING STATE */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #0b6f35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ALERT */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* RESPONSIVIDADE */
+        @media (min-width: 1200px) {
+            .routes-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .header-title {
+                font-size: 20px;
+            }
+
+            .upload-section {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .upload-section .btn {
+                width: 100%;
+            }
+
+            .routes-list {
+                grid-template-columns: 1fr;
+            }
+
+            .route-card {
+                padding: 15px;
+            }
+
+            .route-name {
+                font-size: 16px;
+            }
+
+            .route-info {
+                font-size: 13px;
+            }
+
+            .items-mini-table th,
+            .items-mini-table td {
+                padding: 4px;
+                font-size: 11px;
+            }
+
+            .route-actions {
+                flex-direction: column;
+            }
+
+            .route-actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-left {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .logo {
+                height: 40px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+
+            .route-card {
+                padding: 12px;
+            }
+
+            .route-name {
+                font-size: 14px;
+            }
+
+            .route-info {
+                font-size: 12px;
+            }
+
+            .info-label {
+                min-width: 60px;
+            }
+
+            .items-mini-table th,
+            .items-mini-table td {
+                padding: 3px;
+                font-size: 10px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .btn-small {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <img src="https://grupovirtron.com/wp-content/uploads/2025/11/logo1012.png" alt="Virtron Energia Solar" class="logo">
+            <div class="header-title">PAINEL ADMINISTRATIVO</div>
+        </div>
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    📤 IMPORTAR EXCEL
+                </button>
+            </div>
+            <button class="btn btn-success" id="refreshBtn" onclick="loadRoutes()">
+                🔄 ATUALIZAR
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTAINER -->
+    <div class="container">
+        <!-- ALERT -->
+        <div class="alert" id="alert"></div>
+
+        <!-- ROUTES LIST -->
+        <div id="routesList" class="routes-list">
+            <div class="loading">
+                <span class="spinner"></span>
+                Carregando rotas...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURAÇÃO =====
+        const API_BASE = 'http://127.0.0.1:8000';
+        const ROUTES_ENDPOINT = `${API_BASE}/routes`;
+        const IMPORT_ENDPOINT = `${API_BASE}/import`;
+
+        // ===== UTILIDADES =====
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+
+        function formatValue(value) {
+            return value === null || value === undefined || value === '' ? '—' : value;
+        }
+
+        function groupItemsByBrand(items) {
+            if (!items || items.length === 0) return [];
+
+            const grouped = {};
+
+            items.forEach(item => {
+                const moduleKey = `${item.module_qty}|${item.module_brand}`;
+                const inverterKey = `${item.inverter_qty}|${item.inverter_brand}`;
+
+                if (!grouped[moduleKey]) {
+                    grouped[moduleKey] = {
+                        module_qty: item.module_qty,
+                        module_brand: item.module_brand,
+                        inverter_qty: item.inverter_qty,
+                        inverter_brand: item.inverter_brand
+                    };
+                }
+            });
+
+            return Object.values(grouped);
+        }
+
+        // ===== RENDERIZAÇÃO DE ROTAS =====
+        function renderRoutes(routes) {
+            const container = document.getElementById('routesList');
+
+            if (!routes || routes.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div class="empty-state-text">Nenhuma rota encontrada</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = routes.map(route => {
+                const isCompleted = route.status === 'completed';
+                const statusLabel = {
+                    'waiting': 'Aguardando',
+                    'in_progress': 'Em Carregamento',
+                    'completed': 'Concluída'
+                }[route.status] || route.status;
+
+                let stopsHtml = '';
+                if (route.stops && route.stops.length > 0) {
+                    stopsHtml = route.stops.map(stop => {
+                        const cityName = formatValue(stop.city);
+                        let itemsHtml = '';
+
+                        if (stop.items && stop.items.length > 0) {
+                            const groupedItems = groupItemsByBrand(stop.items);
+                            itemsHtml = `
+                                <table class="items-mini-table">
+                                    <thead>
+                                        <tr>
+                                            <th>QTD</th>
+                                            <th>MÓDULOS</th>
+                                            <th>QTD</th>
+                                            <th>INVERSORES</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${groupedItems.map(item => `
+                                            <tr>
+                                                <td><span class="qty-mini">${formatValue(item.module_qty)}</span></td>
+                                                <td>${formatValue(item.module_brand)}</td>
+                                                <td><span class="qty-mini">${formatValue(item.inverter_qty)}</span></td>
+                                                <td>${formatValue(item.inverter_brand)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            `;
+                        }
+
+                        return `
+                            <div class="stop-item">
+                                <div class="stop-city">${cityName}</div>
+                                ${itemsHtml}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                let actionsHtml = '';
+                if (route.status === 'waiting') {
+                    actionsHtml = `
+                        <button class="btn btn-success btn-small" onclick="updateRouteStatus(${route.id}, 'in_progress')">
+                            ▶️ INICIAR
+                        </button>
+                    `;
+                } else if (route.status === 'in_progress') {
+                    actionsHtml = `
+                        <button class="btn btn-warning btn-small" onclick="updateRouteStatus(${route.id}, 'completed')">
+                            ✓ CONCLUIR
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="route-card ${isCompleted ? 'completed' : ''}">
+                        <div class="route-header">
+                            <div class="route-name">${formatValue(route.name)}</div>
+                            <span class="status-badge status-${route.status}">${statusLabel}</span>
+                        </div>
+
+                        <div class="route-info">
+                            <div class="info-row">
+                                <span class="info-label">Motorista:</span>
+                                <span class="info-value">${formatValue(route.driver_name)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Placa:</span>
+                                <span class="info-value">${formatValue(route.truck_plate)}</span>
+                            </div>
+                        </div>
+
+                        ${stopsHtml ? `
+                            <div class="stops-section">
+                                <div class="stops-title">Paradas</div>
+                                ${stopsHtml}
+                            </div>
+                        ` : ''}
+
+                        ${actionsHtml ? `
+                            <div class="route-actions">
+                                ${actionsHtml}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== CARREGAR ROTAS =====
+        async function loadRoutes() {
+            try {
+                const response = await fetch(ROUTES_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const routes = await response.json();
+                renderRoutes(routes);
+            } catch (error) {
+                console.error('Erro ao carregar rotas:', error);
+                showAlert('Erro ao carregar rotas. Verifique a conexão com o servidor.', 'error');
+                document.getElementById('routesList').innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <div class="empty-state-text">Erro ao conectar ao servidor</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ===== ATUALIZAR STATUS DA ROTA =====
+        async function updateRouteStatus(routeId, newStatus) {
+            try {
+                const response = await fetch(`${ROUTES_ENDPOINT}/${routeId}?status=${newStatus}`, {
+                    method: 'PATCH'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                showAlert(`Rota atualizada para "${newStatus === 'in_progress' ? 'Em Carregamento' : 'Concluída'}" com sucesso!`, 'success');
+                loadRoutes();
+            } catch (error) {
+                console.error('Erro ao atualizar status:', error);
+                showAlert('Erro ao atualizar status da rota.', 'error');
+            }
+        }
+
+        // ===== IMPORTAR ARQUIVO =====
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(IMPORT_ENDPOINT, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                showAlert('Arquivo importado com sucesso!', 'success');
+                loadRoutes();
+                e.target.value = ''; // Limpar input
+            } catch (error) {
+                console.error('Erro ao importar arquivo:', error);
+                showAlert('Erro ao importar arquivo. Verifique o formato.', 'error');
+                e.target.value = '';
+            }
+        });
+
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', loadRoutes);
+    </script>
+</body>
+</html>
