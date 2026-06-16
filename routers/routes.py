@@ -57,6 +57,8 @@ def list_routes(session: Session = Depends(get_session)):
             "id": route.id,
             "name": route.name,
             "status": route.status,
+            "driver_name": route.driver_name,
+            "truck_plate": route.truck_plate,
             "stops": stops_with_items
         })
 
@@ -142,6 +144,12 @@ async def import_route(file: UploadFile, session: Session = Depends(get_session)
     route_name = header_row[1]
     driver_name = header_row[3]
     truck_plate = header_row[5]
+
+    existing = session.exec(select(Route).where(Route.name == route_name)).first()
+    if existing:
+        return {"message": "Rota já existe", "route_id": existing.id}
+
+    db_route = Route(name=route_name, driver_name=driver_name, truck_plate=truck_plate)
 
     db_route = Route(name=route_name, driver_name=driver_name, truck_plate=truck_plate)
     session.add(db_route)
